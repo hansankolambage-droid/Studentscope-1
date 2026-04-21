@@ -29,8 +29,9 @@
       <input type="text" id="fullName" required>
     </div>
     <div class="form-group">
-      <label for="nic" data="admin.clerks.nic">NIC (Username) <span class="required">*</span></label>
-      <input type="text" id="nic" required>
+      <label for="nic" data="admin.clerks.nic">NIC (Username) </label>      
+      <input type="text" id="nic" required oninput="validateNic()">
+      <span id="nicFeedback" class="form-hint"></span>
       <small class="form-hint" data="admin.clerks.nicHint">NIC will be used as username and default password</small>
     </div>
     <div class="form-group">
@@ -120,6 +121,27 @@
 <script>
   let allClerks = [];
 
+  function validateNic() {
+  const value = document.getElementById("nic").value;
+  const feedback = document.getElementById("nicFeedback");
+  // Old NIC: 9 digits + V/v/X/x, New NIC: 12 digits
+  const valid = /^(\d{9}[vVxX]|\d{12})$/.test(value);
+  if (value === "") {
+    feedback.textContent = "";
+    feedback.style.color = "";
+    return true;
+  }
+  if (valid) {
+    feedback.textContent = "Valid NIC";
+    feedback.style.color = "green";
+    return true;
+  } else {
+    feedback.textContent = "NIC must be 9 digits + V/X or 12 digits (e.g., 123456789V or 200012345678)";
+    feedback.style.color = "red";
+    return false;
+  }
+}
+
   function initTable() {
     const table = document.getElementById("clerks-table");
     table.setColumns([
@@ -201,6 +223,10 @@
 
   async function saveClerk(e) {
     e.preventDefault();
+if (!validateNic()) {
+  toast("Please enter valid NIC.", "fa-solid fa-circle-exclamation");
+  return;
+}
     const id = document.getElementById("clerkId").value;
     const data = {
       full_name: document.getElementById("fullName").value,
